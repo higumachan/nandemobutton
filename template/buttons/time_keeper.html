@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta property="og:site_name" content="SimpleTimeKeeper" />
+    <meta property="og:title" content="SimpleTimeKeeper" />
+    <meta property="og:description" content="SimpleTimeKeeper helps you timekeeping. It can be used for presentations and lightning talks. You don't have to install any software for timekeeping now; instead, just visit this website when needed." />
+    <meta property="og:url" content="http://timekeeper.fluxflex.com/" />
+    <meta property="og:image" content="http://timekeeper.fluxflex.com/sample.png" />
+    <meta property="og:type" content="website" />
+    <meta property="fb:admins" content="yasulab" />
+    
+
+    <script type="text/javascript" src="https://apis.google.com//static/js/plusone.js"></script>
+    
+    <script type="text/javascript" src="/static/js/jquery-1.4.1.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.lwtCountdown-1.0.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.alphanumeric.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.popup.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.sound.js"></script>
+	<link rel="stylesheet" type = "text/css" href="/static/js/jquery.jqplot.min.css" />
+	<script type="text/javascript" src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
+	<script type="text/javascript" src="/static/js/jqplot.pieRenderer.min.js"></script>
+	<script type="text/javascript" src="/static/js/jqplot.donutRenderer.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/popup.css"></link>
+    <link rel="stylesheet" type="text/css" href="/static/css/time.css"></link>	
+    <title>SimpleTimeKeeper</title>
+  </head>
+
+  <body bgcolor="black" style="overflow: hidden;">
+    <div id="container">    
+
+      <div class="pane">
+	<div id="countdown_dashboard">
+	  <div class="dash hours_dash">
+	    <span class="dash_title">hour</span>
+	    <div class="digit">0</div>
+	    <div class="digit">0</div>
+	  </div>
+	  
+	  <div class="dash minutes_dash">
+	    <span class="dash_title">min</span>
+	    <div class="digit">0</div>
+	    <div class="digit">0</div>
+	  </div>
+	  
+	  <div class="dash seconds_dash">
+	    <span class="dash_title">sec</span>
+	    <div class="digit">0</div>
+	    <div class="digit">0</div>
+	  </div>
+	</div>
+
+	<div id="dialog-overlay"></div>
+	<div id="dialog-box">
+	  <div class="dialog-content">
+	    <div id="dialog-message"></div>
+	    <a href="#" class="button">OK</a>
+	  </div>
+	</div>
+	
+	<div id="countdown_controls">
+	  <button onclick="stop()">stop</button>
+	  <button onclick="start()">start</button>
+	  <button onclick="reset()">set</button>
+
+	  <br/>
+	  <br/>
+
+	  <input type="number" name="hours" id="hours" size="3" maxlength=2 />
+	  <input type="number" name="minutes" id="minutes" size="3" maxlength=2 />
+	  <input type="number" name="seconds" id="seconds" size="3" maxlength=2 />
+	  
+	<br/>
+	<br/>
+
+	<ul id="share" align="center">
+	    <li>
+	      <a href="http://twitter.com/share" target="_blank" class="twitter-share-button"
+		 data-text="#SimpleTimeKeeper"
+		 data-count="vertical" data-lang="en"></a>
+	      <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+	      <a id="fb-root"></a>
+	    </li>
+	    <li>
+	      <!-- Place this tag where you want the +1 button to render -->
+	      <g:plusone size="tall"></g:plusone>
+	    </li>
+	    <li>
+	      <script src="http://connect.facebook.net/en_US/all.js#appId=108818705886917&amp;xfbml=1"></script>
+	      <fb:like href="timekeeper.fluxflex.com" send="false" layout="box_count"
+		       width="45" show_faces="false" action="like" font="tahoma"></fb:like>
+	    </li>
+	</ul>
+
+	</div>
+
+
+	
+	<script language="javascript" type="text/javascript">
+	  // Form Validation
+	  $('#hours').numeric();
+	  $('#minutes').numeric();
+	  $('#seconds').numeric();
+	  var start_time;
+	  var end_time;
+
+function get_plot(){
+		$.getJSON("/get_like_hist_json/{{id}}", {"start":start_time, "end":end_time}, function(json){
+			var plot1 = $.jqplot('chart', [json.chart_data], {cursor: {show:true, tooltipLocation: 'nw'}, axes: {xaxis: { min: 0} ,yaxis: { min:0}}, seriesDefaults: {markerOptions: {"size": 0}}}).replot();
+		});
+	}function get_date(){
+		date = new Date();
+		date_string = date.getFullYear()  + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + date.getDate()).slice(-2) + " " + ("0" + date.getHours()).slice(-2) + ":" + ("0" + date.getMinutes()).slice(-2) + ":" + ("0" + date.getSeconds()).slice(-2);
+		
+		return (date_string);
+	}
+	function get_2digit(data){
+		return (("0" + data).slice(-2));
+	}
+	function counter(){
+		count++;
+		data = get_2digit(Math.floor(count / 60)) + ':' + get_2digit(count % 60);
+		$("#counter").attr("value", data);
+	}
+	  
+    time = (location.search || location.hash).split(/[^0-9]/).filter(function (x) { return x !== ""; }).slice(0, 3).map(function (x) { return parseInt(x, 10); }).reverse();
+	  // Set Timer
+	  $('#hours').val(time[2] !== undefined ? time[2] : 0);
+	  $('#minutes').val(time[1] !== undefined ? time[1] : 0);
+	  $('#seconds').val(time[0] !== undefined ? time[0] : 10);
+
+	  //alert($('#seconds').val());
+	  //alert(h+m+s);
+	  
+	  // Set the Countdown
+	  jQuery(document).ready(function() {
+	  
+	    $('#countdown_dashboard').countDown({
+	      targetOffset: {
+	        'day': 	0,
+	        'month': 	0,
+	        'year': 	0,
+	        'hour': 	eval($('#hours').val()),
+	        'min': 	eval($('#minutes').val()),
+	        'sec': 	eval($('#seconds').val())
+	      },
+	      // onComplete Function
+	      onComplete: function() {
+		  	end_time = get_date();
+	        popup('Finished!');
+	        $.sound.play("/static/sound/gong3.wav");
+			get_plot();
+			$("#chart").css("display", "block");
+			$("#chart").css("display", "block");
+	      }
+	      //onComplete: function() {
+	      //$('#complete_info_message').slideDown();
+	      //}
+	    });
+	    $('#countdown_dashboard').stopCountDown();
+	  });
+	  
+	  // Stop countdown
+	  function stop() {
+	  $('#countdown_dashboard').stopCountDown();
+	  }
+
+	  // Start countdown
+	  function start() {
+	  	start_time = get_date();
+	    $('#countdown_dashboard').stopCountDown();
+	    $('#countdown_dashboard').startCountDown();
+	    $.sound.play("/static/sound/gong.wav");
+	  }
+
+	  // reset and start
+	  function reset() {
+	  $('#countdown_dashboard').stopCountDown();
+	  $('#countdown_dashboard').setCountDown({
+	  targetOffset: {
+	  'day': 	0,
+	  'month': 	0,
+	  'year': 	0,
+	  'hour': 	eval($('#hours').val()),
+	  'min': 	eval($('#minutes').val()),
+	  'sec': 	eval($('#seconds').val())
+	  }
+	  });				
+	  $('#countdown_dashboard').startCountDown();
+	  $('#countdown_dashboard').stopCountDown();
+	  }
+
+	  // onComplete
+	  
+	  
+	</script>
+      </div>
+      
+    </div>
+		<div id="chart" style="display: none; height: 640px; width: 100%" onclick="$('#chart').css('display', 'none');"></div>
+  </body>
+</html>

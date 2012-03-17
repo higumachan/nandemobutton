@@ -1,0 +1,12 @@
+<table>
+{%for button in buttons%}
+	<tr>
+	<td>{{button.label}}ボタン</td>
+	<td style="text-align: center;margin-left: auto; margin-right: auto;"><a href="/like_post/{{button.id}}/">post_page</a></td>
+	<td><a href="/button_display_page/{{button.id}}/">view_page</a></td>
+	<td><a href="/button_controler/{{button.id}}/">control_page</a></td>
+	<td><a href="/button_delete/{{button.id}}/">- delete</a></td>
+	</tr>
+{%endfor%}
+<tr><td><a href="/button_post">+add_button</a></td></tr>
+</table>
